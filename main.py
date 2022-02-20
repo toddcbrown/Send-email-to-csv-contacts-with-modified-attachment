@@ -12,10 +12,26 @@ attachment = 'bill.txt'
 subject = 'Sutro Jersey '
 contents = ''
 
-for i in df.index:
-  yag = yagmail.SMTP(user=sender,password=my_secret)
-  contents = 'Hi %s! You owe $%s pay now please!\nThanks!\nTodd\n----'%(df.name[i],df.amount[i])
-  attach = df.filepath[i]#str('attachments/%s'%df.filepath[i])
-  yag.send(df.email[i],subject=subject,contents=contents,attachments=attach)
-  print(df.name[i], ' email sent')
+yag = yagmail.SMTP(user=sender,password=my_secret)
+
+def generate_file(filename,content):
+  with open(filename, 'w') as file:
+    file.write(str(content))
+
+for index,row in df.iterrows():
+  name = row['name']
+  filename = name + '.txt'
+  amount = row['amount']
+
+  generate_file(filename,amount)
+
+  receiver_email = row['email']
+  subject = 'This is your final notice!'
+  contents = [f""" 
+  Hey, {name} you have to pay {amount}.
+  Bill is attached, you butthole.
+  """,filename,
+  ]
+
+  yag.send(to=receiver_email,subject=subject,contents=contents)
   
